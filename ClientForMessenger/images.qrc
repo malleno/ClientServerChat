@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/Connect.png</file>
+        <file>images/next.png</file>
+    </qresource>
+</RCC>
