@@ -17,21 +17,22 @@ class ClientForMessenger : public QWidget
 public:
     ClientForMessenger(QWidget *parent = nullptr);
     ~ClientForMessenger();
+
 public slots:
     void connectionEstabilished();
     void readMessege();
     void socketError(QAbstractSocket::SocketError);
     void sentMessegeToServer();
+    void sentCommandToServer(qint8, QString);
     void connectToHost();
+
+private:
+    QTextEdit* GetMessegeDisplay();
+    void DisplayMessege(QString);
+    void executeCommandFromServer(qint8, QString);
+
 private:
     Ui::ClientForMessenger *ui;
     QTcpSocket* tcpSocket_;
     qint16 nextBlockBytes_;
-
-    QTextEdit* GetMessegeDisplay();
-    void DisplayMessege(QString);
-    void executeCommandFromServer(QTcpSocket*, std::bitset<8>, QString);
-
-
-
 };

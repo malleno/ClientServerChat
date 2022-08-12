@@ -14,7 +14,10 @@ ClientForMessenger::ClientForMessenger(QWidget *parent)
     connect(ui->sendButton, SIGNAL(clicked()), SLOT(sentMessegeToServer()));
 }
 
-void ClientForMessenger::connectToHost(){
+
+
+void ClientForMessenger::connectToHost()
+{
     const QString host = "localhost";
     int port = 25;
     if(tcpSocket_->state() == QTcpSocket::SocketState::ConnectedState){
@@ -26,17 +29,26 @@ void ClientForMessenger::connectToHost(){
     //connect(tcpSocket_, SIGNAL(error(QAbstractSocket::SocketError)), this,  SLOT(socketError(QAbstractSocket::SocketError)));
 }
 
+
+
 ClientForMessenger::~ClientForMessenger()
 {
     delete ui;
 }
 
-void ClientForMessenger::connectionEstabilished(){
+
+
+void ClientForMessenger::connectionEstabilished()
+{
 
 }
 
-void ClientForMessenger::readMessege(){
+
+
+void ClientForMessenger::readMessege()
+{
     QString messege;
+    qint8 command;
     QDataStream in(tcpSocket_);
     while(true){
         if(nextBlockBytes_ == 0){
@@ -47,47 +59,68 @@ void ClientForMessenger::readMessege(){
         }
         if(tcpSocket_->bytesAvailable() < nextBlockBytes_){
             return;
-        }else{
+        }
+        else{
             nextBlockBytes_ = 0;
         }
-        in >> messege;
-        DisplayMessege(messege);
+        in >> command >> messege;
+        executeCommandFromServer(command, messege);
     }
 }
 
-void ClientForMessenger::socketError(QAbstractSocket::SocketError error){
+
+
+void ClientForMessenger::socketError(QAbstractSocket::SocketError error)
+{
     DisplayMessege("Error");
 }
 
-void ClientForMessenger::sentMessegeToServer(){
+
+
+void ClientForMessenger::sentCommandToServer(qint8 command, QString messege)
+{
     QByteArray rawMessege;
     QDataStream out(&rawMessege, QIODevice::WriteOnly);
-    QString messege = ui->messegeInput->document()->toRawText();
-    out <<qint16(0) <<  messege;
+    out <<qint16(0) << command <<  messege;
     out.device()->seek(0);
     out << quint16(rawMessege.size() - sizeof(qint16));
     tcpSocket_->write(rawMessege);
-    messege.push_front("You : ");
-    DisplayMessege(messege);
+}
+
+
+
+void ClientForMessenger::sentMessegeToServer()
+{
+    qint8 command(0);
+    QString messege = ui->messegeInput->document()->toRawText();
+    sentCommandToServer(command, messege);
     ui->messegeInput->clear();
 }
 
-QTextEdit* ClientForMessenger::GetMessegeDisplay(){
+
+
+QTextEdit* ClientForMessenger::GetMessegeDisplay()
+{
     return ui->messegesDisplay;
 }
 
-void ClientForMessenger::DisplayMessege(QString messege){
+
+
+void ClientForMessenger::DisplayMessege(QString messege)
+{
     GetMessegeDisplay()->append(messege);
 }
 
-void ClientForMessenger::executeCommandFromServer(QTcpSocket* client, std::bitset<8> command, QString messege){
-    int commandId = command._Find_first();
+
+
+void ClientForMessenger::executeCommandFromServer(qint8 command, QString messege)
+{
+    int commandId = command;
     switch (commandId) {
 
     case 0:
         DisplayMessege(messege);
         break;
-
     default:
         DisplayMessege("Unknown Command");
     }

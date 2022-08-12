@@ -19,10 +19,25 @@ class ServerForMessenger : public QWidget
 public:
     ServerForMessenger(int port, QWidget *parent = nullptr);
     ~ServerForMessenger();
+
 public slots:
     void NewConnection();
     void ReadClient();
     void Disconnected();
+private:
+    void sendToClient(QTcpSocket*, QString);
+    void makeDialogWithFreeClient();
+    void displayMessege(QString);
+    void executeCommandFromClient(QTcpSocket*, qint8, QString);
+    void sentMessegeForClientsInSession(QTcpSocket*, QString);
+    void sendCommandToClient(QTcpSocket *, qint8 , QString );
+
+    bool isSessionWithClient(QTcpSocket*);
+    void removeSessionWithClient(QTcpSocket*);
+    void createSessionWithTwoClients(QTcpSocket*, QTcpSocket*);
+    QTcpSocket* getSessionSecondClient(QTcpSocket*);
+
+    void addToQueueClient(QTcpSocket*);
 
 private:
     Ui::ServerForMessenger *ui;
@@ -31,12 +46,5 @@ private:
     QHash<QTcpSocket*, QTcpSocket*> sessionPeopleSockets_;
     QQueue<QTcpSocket*> clientSocketsQueue_;
     QTcpSocket* nextFreeClient_;
-
-   void sendToClient(QTcpSocket*, QString);
-   void makeDialogWithFreeClient();
-   void displayMessege(QString);
-   void executeCommandFromClient(QTcpSocket*, std::bitset<8>, QString);
-
-
 };
 #endif // SERVERFORMESSENGER_H
